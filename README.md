@@ -43,7 +43,7 @@ These glyphs are added from [Hack font](https://github.com/source-foundry/Hack) 
 
 The `prepare-font` script simply opens the file with [FontForge](https://fontforge.org) and save them again to fix some internal structure errors if any, while `cleanup-font` saves the patched font using Nerd Font format: FAMILYNAME_STYLE_NERD_FONT_COMPLETE\[\_MONO\].
 
-PS: The generated fonts may now work correctly on Windows, due to a limitation of 31 characters in the font name.
+PS: The generated fonts may not work correctly on Windows, due to a limitation of 31 characters in the font name.
 
 ## Requirements
 Besides `bash` and `curl`, the script uses `fc-scan` that is included in `fontconfig` package to retrieve font data, all of them should be installed by default on any Linux distribution, but macOS users may need to use `brew`. The only extra dependency is [FontForge](https://fontforge.org).
