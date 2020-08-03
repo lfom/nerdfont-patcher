@@ -106,11 +106,12 @@ generate_extra() {
 
 save_font() {
     [ "$1" == "" ] && pf "Internal error: missing argument for cleanup!" && return 1
-    filename="$1" && fontname="$2" && fontstyle="$3"
-    [ -r "$filename" ] && fontforge cleanup-font --input "$filename" --output "$filename" \
-            --name "${fontname}" --style "${fontstyle}" --version "$VERSION" &>> $LOGFILE || \
+    filename="$1" && fname="$2" && fstyle="$3"
+    [ -r "$filename" ] && fontforge --script cleanup-font --input "$filename" \
+            --output "$filename" --name "${fname}" --style "${fstyle}" \
+            --version "$VERSION" &>> $LOGFILE || \
             pf "Error patching font: '${filename}' not found!"
-    [ -f "$filename" ] && pf "Patched successful: $filename" || return 1
+    [ -f "$filename" ] && pf "Patched successful ${fname} ${fstyle}: $filename" || return 1
     return 0
 }
 
@@ -142,19 +143,22 @@ patch_font() {
     rcode=0
 
     [ "${fontinfo[0]}" == "" ] && pf "Skipping file(${fext}): $fontfile" && return 1
-    pf "Patching ${fontinfo[0]} ${fontinfo[1]} from file(${fext}): $fontfile"
-    inputfile="${fontinfo[0]} ${fontinfo[1]}-NF.$fext"
+    fontname=${fontinfo[0]%%,*}
+    fontstyle=${fontinfo[1]%%,*}
+
+    pf "Patching ${fontname} ${fontstyle} from file(${fext}): $fontfile"
+    inputfile="${fontname} ${fontstyle}-NF.$fext"
     inputfile="${inputfile// /}"
     fontforge --quiet prepare-font --input "$fontfile" --output "$inputfile" &>> $LOGFILE
 
-    outputfile="${fontinfo[0]} ${fontinfo[1]} Nerd Font Complete Mono.$fext"
+    outputfile="${fontname} ${fontstyle} Nerd Font Complete Mono.$fext"
     patch_mono "$inputfile" "$fext"
-    save_font "$outputfile" "${fontinfo[0]}" "${fontinfo[1]}"
+    save_font "$outputfile" "${fontname}" "${fontstyle}"
     rcode=$?
 
-    outputfile="${fontinfo[0]} ${fontinfo[1]} Nerd Font Complete.$fext"
+    outputfile="${fontname} ${fontstyle} Nerd Font Complete.$fext"
     patch "$inputfile" "$fext"
-    save_font "$outputfile" "${fontinfo[0]}" "${fontinfo[1]}"
+    save_font "$outputfile" "${fontname}" "${fontstyle}"
     [ "$rcode" != "1" ] && rcode=$?
 
     [ -r "$inputfile" ] && rm "$inputfile" || \

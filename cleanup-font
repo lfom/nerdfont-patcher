@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding=utf8
 
 import fontforge
@@ -14,27 +14,33 @@ parser.add_argument("--version", help="(optional) text to add to the existing ve
 args = parser.parse_args()
 
 # Configure names
-isMono = (True if ("Mono" in args.input) else False)
-if isMono:
+fontstyle=str(args.style)
+if ("Mono" in args.input.replace(args.name,"")):
     fontname="{} {} Nerd Font Complete Mono".format(args.name, args.style)
     familyname="{} Nerd Font Mono".format(args.name)
+    filefontname="{}NerdFontCM-{}".format(args.name, args.style).replace(" ", "")
 else:
     fontname="{} {} Nerd Font Complete".format(args.name, args.style)
     familyname="{} Nerd Font".format(args.name)
+    filefontname="{}NerdFontC-{}".format(args.name, args.style).replace(" ", "")
 print("Cleaning up font: {}…".format(fontname))
 
 # Rename the file
 file=fontforge.open(args.input)
-if isMono:
-    file.fontname="{}NerdFontCM-{}".format(args.name, args.style).replace(" ", "")
-else:
-    file.fontname="{}NerdFontC-{}".format(args.name, args.style).replace(" ", "")
+file.fontname=filefontname
 file.familyname=familyname
 file.fullname=fontname
-file.appendSFNTName("English (US)", "Preferred Family", familyname)
-file.appendSFNTName("English (US)", "Compatible Full", fontname)
-file.appendSFNTName("English (US)", "UniqueID", fontname)
+if file.sfnt_names[2][2] != fontstyle:
+    file.appendSFNTName('English (US)', 'SubFamily', fontstyle + ' ')
+    file.appendSFNTName('English (US)', 'SubFamily', fontstyle)
+    file.appendSFNTName('English (US)', 'SubFamily', ' '.join(fontstyle).replace(' ', ''))
+file.appendSFNTName('English (US)', 'Preferred Family', familyname)
+file.appendSFNTName('English (US)', 'Preferred Styles', fontstyle)
+file.appendSFNTName('English (US)', 'Compatible Full', fontname)
+file.appendSFNTName('English (US)', 'UniqueID', filefontname)
 #file.appendSFNTName("English (US)", "Trademark", "")
+for tup in file.sfnt_names:
+    print(str(tup))
 
 # Mix our version information in
 file.sfntRevision = None # Auto-set (refreshed) by fontforge
