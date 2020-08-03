@@ -109,7 +109,7 @@ save_font() {
     filename="$1" && fontname="$2" && fontstyle="$3"
     [ -r "$filename" ] && fontforge cleanup-font --input "$filename" --output "$filename" \
             --name "${fontname}" --style "${fontstyle}" --version "$VERSION" &>> $LOGFILE || \
-            pf "Error patching font: '${filename}' not found!" 
+            pf "Error patching font: '${filename}' not found!"
     [ -f "$filename" ] && pf "Patched successful: $filename" || return 1
     return 0
 }
@@ -130,10 +130,10 @@ patch() {
 
 patch_font() {
     [ "$1" == "" ] && pf "Internal error: patch_font requires an argument!" && return 1
-    [ ! -r "$1" ] && pf "Internal error: patch_font could not open supplied file!" && return 1
+    [ ! -r "$1" ] && pf "Error! Could not open supplied file: $1" && return 1
     fontfile="$1" && fname=$(basename "$fontfile") && fext="${fname##*.}"
     fext=${fext,,}
-    [ "$fext" == "" ] && pf "Internal error: patch_font could not find a valid file extension!" && return 1
+    [ "$fext" == "" ] && pf "Error! Could not find a valid file extension in: $1" && return 1
     OLDIFS=$IFS && IFS=$'\n'
     fontinfo=( # Get font info using 'fc-scan' provided by fontconfig package
         $(fc-scan --format "%{family}\n%{style}" "$fontfile")
@@ -141,18 +141,19 @@ patch_font() {
     IFS=$OLDIFS
     rcode=0
 
+    [ "${fontinfo[0]}" == "" ] && pf "Skipping file(${fext}): $fontfile" && return 1
     pf "Patching ${fontinfo[0]} ${fontinfo[1]} from file(${fext}): $fontfile"
     inputfile="${fontinfo[0]} ${fontinfo[1]}-NF.$fext"
     inputfile="${inputfile// /}"
     fontforge --quiet prepare-font --input "$fontfile" --output "$inputfile" &>> $LOGFILE
 
     outputfile="${fontinfo[0]} ${fontinfo[1]} Nerd Font Complete Mono.$fext"
-    patch_mono "$outputfile" "$fext"
+    patch_mono "$inputfile" "$fext"
     save_font "$outputfile" "${fontinfo[0]}" "${fontinfo[1]}"
     rcode=$?
 
     outputfile="${fontinfo[0]} ${fontinfo[1]} Nerd Font Complete.$fext"
-    patch "$outputfile" "$fext"
+    patch "$inputfile" "$fext"
     save_font "$outputfile" "${fontinfo[0]}" "${fontinfo[1]}"
     [ "$rcode" != "1" ] && rcode=$?
 
