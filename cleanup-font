@@ -30,14 +30,21 @@ file=fontforge.open(args.input)
 file.fontname=filefontname
 file.familyname=familyname
 file.fullname=fontname
-if file.sfnt_names[2][2] != fontstyle:
-    file.appendSFNTName('English (US)', 'SubFamily', fontstyle + ' ')
-    file.appendSFNTName('English (US)', 'SubFamily', fontstyle)
-    file.appendSFNTName('English (US)', 'SubFamily', ' '.join(fontstyle).replace(' ', ''))
+
+# Reset SubFamily in some fonts that have the attribute
+try:
+    if file.sfnt_names[2][2] != fontstyle:
+        file.appendSFNTName('English (US)', 'SubFamily', fontstyle + ' ')
+        file.appendSFNTName('English (US)', 'SubFamily', fontstyle)
+        file.appendSFNTName('English (US)', 'SubFamily', ' '.join(fontstyle).replace(' ', ''))
+except AttributeError as err:
+    print('Cleanup exception:', err)
+
 file.appendSFNTName('English (US)', 'Preferred Family', familyname)
 file.appendSFNTName('English (US)', 'Preferred Styles', fontstyle)
 file.appendSFNTName('English (US)', 'Compatible Full', fontname)
 file.appendSFNTName('English (US)', 'UniqueID', filefontname)
+
 #file.appendSFNTName("English (US)", "Trademark", "")
 for tup in file.sfnt_names:
     print(str(tup))
