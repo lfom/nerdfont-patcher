@@ -153,11 +153,17 @@ patch_font() {
 
     outputfile="${fontname} ${fontstyle} Nerd Font Complete Mono.$fext"
     patch_mono "$inputfile" "$fext"
+    if [ "Regular" == "$fontstyle" ]; then
+        [ -f "$outputfile" ] || outputfile="${fontname} Nerd Font Complete Mono.$fext"
+    fi
     save_font "$outputfile" "${fontname}" "${fontstyle}"
     rcode=$?
 
     outputfile="${fontname} ${fontstyle} Nerd Font Complete.$fext"
     patch "$inputfile" "$fext"
+    if [ "Regular" == "$fontstyle" ]; then
+        [ -f "$outputfile" ] || outputfile="${fontname} Nerd Font Complete.$fext"
+    fi
     save_font "$outputfile" "${fontname}" "${fontstyle}"
     [ "$rcode" != "1" ] && rcode=$?
 
